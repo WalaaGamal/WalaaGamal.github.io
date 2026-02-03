@@ -468,47 +468,36 @@ function openProjectGallery(title, description, imagesArray) {
 // ============================================
 // STATS COUNTER
 // ============================================
+
 function initializeCounters() {
-    const counters = document.querySelectorAll('#about .counter');
-    const speed = 150;
-    let isRunning = false;
+    const counters = document.querySelectorAll('.counter'); // البحث عن كل الكاونترز في الصفحة
+    
+    const countUpdate = (counter) => {
+        const target = +counter.getAttribute('data-target');
+        const count = +counter.innerText;
+        // سرعة متغيرة حسب الرقم (الأرقام الكبيرة تزيد أسرع)
+        const speed = target > 10 ? 30 : 100; 
+        const inc = Math.ceil(target / speed);
 
-    const startAllCounters = () => {
-        counters.forEach(counter => {
-            counter.innerText = '0';
-            const target = +counter.getAttribute('data-target');
-
-            const updateCount = () => {
-                const count = +counter.innerText;
-                const inc = target / speed;
-
-                if (count < target) {
-                    counter.innerText = Math.ceil(count + inc);
-                    setTimeout(updateCount, 20);
-                } else {
-                    counter.innerText = target;
-                }
-            };
-
-            updateCount();
-        });
+        if (count < target) {
+            counter.innerText = count + inc > target ? target : count + inc;
+            setTimeout(() => countUpdate(counter), 40);
+        } else {
+            counter.innerText = target;
+        }
     };
 
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                startAllCounters();
-                isRunning = true;
+                // عند ظهور السكشن: ابدأ العد
+                countUpdate(entry.target);
             } else {
-                isRunning = false; // يسمح بإعادة التشغيل عند الرجوع
+                // عند الخروج من السكشن: صفر الرقم لكي يعيد العد عند العودة (اختياري)
+                entry.target.innerText = "0";
             }
         });
-    }, {
-        threshold: 0.3
-    });
+    }, { threshold: 0.5 }); // سيبدأ العمل عندما يظهر 50% من العنصر
 
-    const aboutSection = document.querySelector('#about');
-    if (aboutSection) {
-        observer.observe(aboutSection);
-    }
+    counters.forEach(counter => observer.observe(counter));
 }
