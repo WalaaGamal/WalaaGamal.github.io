@@ -468,38 +468,37 @@ function openProjectGallery(title, description, imagesArray) {
 // ============================================
 // STATS COUNTER
 // ============================================
-
 function initializeCounters() {
     const counters = document.querySelectorAll('.counter');
-    const speed = 200;
+    const speed = 150;
 
-    const startCounters = () => {
-        counters.forEach(counter => {
-            const updateCount = () => {
-                const target = +counter.getAttribute('data-target');
-                const count = +counter.innerText;
-                const inc = target / speed;
+    const runCounter = (counter) => {
+        counter.innerText = '0'; // reset
+        const target = +counter.getAttribute('data-target');
 
-                if (count < target) {
-                    counter.innerText = Math.ceil(count + inc);
-                    setTimeout(updateCount, 20);
-                } else {
-                    counter.innerText = target;
-                }
-            };
-            updateCount();
-        });
+        const updateCount = () => {
+            const count = +counter.innerText;
+            const inc = target / speed;
+
+            if (count < target) {
+                counter.innerText = Math.ceil(count + inc);
+                setTimeout(updateCount, 20);
+            } else {
+                counter.innerText = target;
+            }
+        };
+        updateCount();
     };
 
-    let counterStarted = false;
-    $(window).on('scroll', function() {
-        const aboutSection = $('#about');
-        if (aboutSection.length) {
-            const sectionTop = aboutSection.offset().top - 600;
-            if ($(window).scrollTop() > sectionTop && !counterStarted) {
-                startCounters();
-                counterStarted = true;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                runCounter(entry.target);
             }
-        }
+        });
+    }, {
+        threshold: 0.6
     });
+
+    counters.forEach(counter => observer.observe(counter));
 }
