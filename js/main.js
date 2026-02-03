@@ -469,36 +469,46 @@ function openProjectGallery(title, description, imagesArray) {
 // STATS COUNTER
 // ============================================
 function initializeCounters() {
-    const counters = document.querySelectorAll('.counter');
+    const counters = document.querySelectorAll('#about .counter');
     const speed = 150;
+    let isRunning = false;
 
-    const runCounter = (counter) => {
-        counter.innerText = '0'; // reset
-        const target = +counter.getAttribute('data-target');
+    const startAllCounters = () => {
+        counters.forEach(counter => {
+            counter.innerText = '0';
+            const target = +counter.getAttribute('data-target');
 
-        const updateCount = () => {
-            const count = +counter.innerText;
-            const inc = target / speed;
+            const updateCount = () => {
+                const count = +counter.innerText;
+                const inc = target / speed;
 
-            if (count < target) {
-                counter.innerText = Math.ceil(count + inc);
-                setTimeout(updateCount, 20);
-            } else {
-                counter.innerText = target;
-            }
-        };
-        updateCount();
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + inc);
+                    setTimeout(updateCount, 20);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+
+            updateCount();
+        });
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                runCounter(entry.target);
+                startAllCounters();
+                isRunning = true;
+            } else {
+                isRunning = false; // يسمح بإعادة التشغيل عند الرجوع
             }
         });
     }, {
-        threshold: 0.6
+        threshold: 0.3
     });
 
-    counters.forEach(counter => observer.observe(counter));
+    const aboutSection = document.querySelector('#about');
+    if (aboutSection) {
+        observer.observe(aboutSection);
+    }
 }
